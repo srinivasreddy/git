@@ -4562,6 +4562,7 @@ static int make_script_with_merges(struct pretty_print_context *pp,
 	while ((commit = get_revision(revs))) {
 		struct commit_list *to_merge;
 		const char *p1, *p2;
+		const char *hex_oid;
 		struct object_id *oid;
 		int is_empty;
 
@@ -4609,9 +4610,15 @@ static int make_script_with_merges(struct pretty_print_context *pp,
 			if (isspace(*p1))
 				*(char *)p1 = '-';
 
+		hex_oid = oid_to_hex(&commit->object.oid);
+
+		if (check_refname_format(label.buf, REFNAME_ALLOW_ONELEVEL) < 0) {
+			strbuf_reset(&label);
+			strbuf_addf(&label, "label-%s", hex_oid);
+		}
+
 		strbuf_reset(&buf);
-		strbuf_addf(&buf, "%s -C %s",
-			    cmd_merge, oid_to_hex(&commit->object.oid));
+		strbuf_addf(&buf, "%s -C %s", cmd_merge, hex_oid);
 
 		/* label the tips of merged branches */
 		for (; to_merge; to_merge = to_merge->next) {
