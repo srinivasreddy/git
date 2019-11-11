@@ -16,8 +16,10 @@ Initial setup:
 
 . ./test-lib.sh
 
+test_vector="$TEST_DIRECTORY/t3434"
+
 compare_msg () {
-	iconv -f "$2" -t "$3" "$TEST_DIRECTORY/t3433/$1" >expect &&
+	iconv -f "$2" -t "$3" "$test_vector/$1" >expect &&
 	git cat-file commit HEAD >raw &&
 	sed "1,/^$/d" raw >actual &&
 	test_cmp expect actual
@@ -39,7 +41,7 @@ test_expect_success setup '
 test_expect_success 'rebase --rebase-merges update encoding eucJP to UTF-8' '
 	git switch -c merge-eucJP-UTF-8 first &&
 	git config i18n.commitencoding eucJP &&
-	git merge -F "$TEST_DIRECTORY/t3433/eucJP.txt" second &&
+	git merge -F "$test_vector/eucJP.txt" second &&
 	git config i18n.commitencoding UTF-8 &&
 	git rebase --rebase-merges master &&
 	compare_msg eucJP.txt eucJP UTF-8
@@ -48,7 +50,7 @@ test_expect_success 'rebase --rebase-merges update encoding eucJP to UTF-8' '
 test_expect_success 'rebase --rebase-merges update encoding eucJP to ISO-2022-JP' '
 	git switch -c merge-eucJP-ISO-2022-JP first &&
 	git config i18n.commitencoding eucJP &&
-	git merge -F "$TEST_DIRECTORY/t3433/eucJP.txt" second &&
+	git merge -F "$test_vector/eucJP.txt" second &&
 	git config i18n.commitencoding ISO-2022-JP &&
 	git rebase --rebase-merges master &&
 	compare_msg eucJP.txt eucJP ISO-2022-JP
@@ -64,7 +66,7 @@ test_rebase_continue_update_encode () {
 		echo for-conflict >two.t &&
 		git add two.t &&
 		git config i18n.commitencoding $old &&
-		git commit -F "$TEST_DIRECTORY/t3433/$msgfile" &&
+		git commit -F "$test_vector/$msgfile" &&
 		git config i18n.commitencoding $new &&
 		test_must_fail git rebase -m master &&
 		test -f .git/rebase-merge/message &&
